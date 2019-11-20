@@ -1,0 +1,74 @@
+import TP_INTEGRADOR_DR_CASA.*
+
+describe "Tests de Dr Casa" {
+
+///////////////////////////////////instancias de enfermedades/////////////////////////
+
+	const malaria500 = new EnfermedadInfecciosa(cantCelulasQueAmenaza = 500)
+	const malaria800 = new EnfermedadInfecciosa(cantCelulasQueAmenaza = 800)
+	const otitis = new EnfermedadInfecciosa(cantCelulasQueAmenaza = 100)
+	const lupus = new EnfermedadAutoinmune(cantCelulasQueAmenaza = 10000)
+	
+///////////////////////////////////instancias de personas/////////////////////////
+
+	const logan = new Persona(cantidadCelulas = 3000000, 
+		enfermedades = #{ malaria500, otitis, lupus }
+	)
+	const frank = new Persona(cantidadCelulas = 3500000)
+	
+	
+/////////////////////// fixture y metodos auxiliares /////////////////////////////
+	
+	fixture {
+		frank.contraerEnfermedad(malaria800)
+		malaria500.reproducirse()
+	}
+	
+	method loganViveUnDia(){
+		logan.vivirUnDia()
+	}
+	
+	method noPoseeEnfermedadesAgresivas(unaPersona){
+		return unaPersona.enfermedades().all{
+			enfermedad => enfermedad.esAgresivaPara(unaPersona).negate()
+		}
+	}
+	
+	method cantidadCelulasAfectadas(unaPersona){
+		if(self.noPoseeEnfermedadesAgresivas(unaPersona)){
+			return 0
+		}else{
+			return unaPersona.enfermedades().filter{
+				enfermedad => enfermedad.esAgresivaPara(unaPersona)
+			}.sum{enfermedad => enfermedad.cantCelulasQueAmenaza()}
+		}
+	}
+	
+	method enfermedadQueMasCelulasAfecta(unaPersona){
+		return unaPersona.enfermedades().max{
+			enfermedad => enfermedad.cantCelulasQueAmenaza()
+		}
+	}
+
+///////////////////////////////////// TESTS ///////////////////////////////////////
+
+	test "Saber la cantidad de células afectadas de Logan que estén afectadas 
+	por enfermedades agresivas " {
+		
+		self.loganViveUnDia()
+		assert.equals(self.cantidadCelulasAfectadas(logan), 0)
+	}
+	
+	test "Saber la enfermedad de Logan que más células afecte"{
+		
+		self.loganViveUnDia()
+		assert.equals(self.enfermedadQueMasCelulasAfecta(logan), lupus)
+	}
+	
+	test "Saber si logan esta en coma"{
+		
+		assert.notThat(logan.estaEnComa())		
+	}
+	
+}
+
