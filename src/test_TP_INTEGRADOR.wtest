@@ -19,13 +19,12 @@ describe "Tests de Dr Casa" {
 	
 /////////////////////// fixture y metodos auxiliares /////////////////////////////
 	
-	fixture {
-		frank.contraerEnfermedad(malaria800)
-		malaria500.reproducirse()
-	}
-	
 	method loganViveUnDia(){
 		logan.vivirUnDia()
+	}
+	
+	method loganVive31Dias(){
+		31.times{numero => logan.vivirUnDia()}
 	}
 	
 	method noPoseeEnfermedadesAgresivas(unaPersona){
@@ -52,22 +51,55 @@ describe "Tests de Dr Casa" {
 
 ///////////////////////////////////// TESTS ///////////////////////////////////////
 
-	test "Saber la cantidad de células afectadas de Logan que estén afectadas 
-	por enfermedades agresivas " {
+	test "Saber si la cantidad de células afectadas de Logan que estén afectadas 
+	por enfermedades agresivas es igual a 0" {
 		
 		self.loganViveUnDia()
 		assert.equals(self.cantidadCelulasAfectadas(logan), 0)
 	}
 	
-	test "Saber la enfermedad de Logan que más células afecte"{
+	test "Saber si la enfermedad de Logan que más células afecta es el lupus"{
 		
 		self.loganViveUnDia()
 		assert.equals(self.enfermedadQueMasCelulasAfecta(logan), lupus)
 	}
 	
-	test "Saber si logan esta en coma"{
+	test "Saber si logan no esta en coma"{
 		
+		self.loganViveUnDia()
 		assert.notThat(logan.estaEnComa())		
+	}
+	
+	test "Logan vive 31 dias y se quiere saber si la cantidad de células afectadas de 
+	Logan, que estén afectadas por enfermedades agresivas, es igual a 10000"{
+		self.loganVive31Dias()
+		assert.equals(self.cantidadCelulasAfectadas(logan), 10000)
+	}
+	
+	test "Logan vive 31 dias y se quiere saber si la enfermedad de Logan que más 
+	células afecta es el lupus"{
+		
+		self.loganVive31Dias()
+		assert.equals(self.enfermedadQueMasCelulasAfecta(logan), lupus)
+	}
+	
+	test "Logan vive 31 dias y se quiere saber si esta en coma"{
+		
+		self.loganVive31Dias()
+		assert.that(logan.estaEnComa())		
+	}
+	
+	test "saber si frank contrae enfermedades correctamente"{
+		assert.equals(frank.enfermedades(), #{})
+		frank.contraerEnfermedad(malaria800)
+		assert.equals(frank.enfermedades(), #{malaria800})
+		
+	}
+	
+	test "saber si la malaria de 800 celulas afectadas, se reproduce correctamente"{
+		assert.equals(malaria500.cantCelulasQueAmenaza(), 500)
+		malaria500.reproducirse()
+		assert.equals(malaria500.cantCelulasQueAmenaza(), 1000)
 	}
 	
 }
