@@ -10,25 +10,46 @@ class Persona {
 		enfermedades.add(enfermedad)
 	}
 
+	method estaSano(){
+		return enfermedades.isEmpty()
+	}
+	
 	method vivirUnDia() {
 		cuantosDiasVivio += 1
-		if (!enfermedades.isEmpty()) {
+		if (!self.estaSano()) {
 			enfermedades.forEach{ enfermedad => enfermedad.afectarPersona(self)}
 		}
 	}
 
 	method estaEnComa() = temperatura >= 45 || cantidadCelulas < 1000000
+	
+	method recibirDosis(unaDosis){
+		enfermedades.forEach{enfermedad => enfermedad.atenuar(unaDosis)}
+		self.curarseDeEnfermedadesInhabilitadas()
+	}
+	
+	method curarseDeEnfermedadesInhabilitadas(){
+		enfermedades.forEach{enfermedad => 
+			if(enfermedad.cantCelulasQueAmenaza() <= 0){
+				enfermedades.remove(enfermedad)
+			}
+		}
+	}
 
 }
 
 ///////////////////////////////////////ENFERMEDADES////////////////////////////////////
 class Enfermedad {
 
-	var property cantCelulasQueAmenaza // el getter se usa en los tests
+	var property cantCelulasQueAmenaza
 
 	method afectarPersona(unaPersona)
 
 	method esAgresivaPara(unaPersona)
+	
+	method atenuar(atenuacion){
+		cantCelulasQueAmenaza -= atenuacion * 15
+	}
 
 }
 
@@ -71,14 +92,29 @@ class EnfermedadAutoinmune inherits Enfermedad {
 }
 
 /////////////////////////////////////////temporada 2//////////////////////////////////////
-/* 
 
- * class Medico inherits Persona{ // TEMPORADA 2 - USANDO SUPER()
+class EnfermoException inherits Exception {}
 
- * 	override method contraerEnfermedad(enfermedad) {
- * 		super(enfermedad)
- * 		self.tomar(100) // valor arbitrario
- * 	}//IMPLEMENTAR tomar(n)
- * }
+class Medico inherits Persona{
+	
+	var dosis = 100	// valor arbitrario
 
- */
+	method atenderEnfermo(unaPersona){
+		if(unaPersona.estaSano().negate()){
+			self.darDosis(unaPersona)
+		}else{
+			throw new EnfermoException (
+				message = "La persona no esta enferma, el doctor no le tiene que curar nada"
+			)
+		}
+	}
+	
+	method darDosis(unaPersona){
+		unaPersona.recibirDosis(dosis)
+	}
+	
+	override method contraerEnfermedad(enfermedad) {
+  		super(enfermedad)
+  		self.darDosis(self) 
+  	}
+  }
