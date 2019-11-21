@@ -10,10 +10,8 @@ class Persona {
 		enfermedades.add(enfermedad)
 	}
 
-	method estaSano(){
-		return enfermedades.isEmpty()
-	}
-	
+	method estaSano() = enfermedades.isEmpty()
+
 	method vivirUnDia() {
 		cuantosDiasVivio += 1
 		if (!self.estaSano()) {
@@ -22,19 +20,23 @@ class Persona {
 	}
 
 	method estaEnComa() = temperatura >= 45 || cantidadCelulas < 1000000
-	
-	method recibirDosis(unaDosis){
-		enfermedades.forEach{enfermedad => enfermedad.atenuar(unaDosis)}
-		self.curarseDeEnfermedadesInhabilitadas()
+
+	method recibirDosis(unaDosis) {
+		if (self.estaMuerto().negate()) {
+			enfermedades.forEach{ enfermedad => enfermedad.atenuar(unaDosis * 15)}
+			self.curarseDeEnfermedadesInhabilitadas()
+		}
 	}
-	
-	method curarseDeEnfermedadesInhabilitadas(){
-		enfermedades.forEach{enfermedad => 
-			if(enfermedad.cantCelulasQueAmenaza() <= 0){
+
+	method curarseDeEnfermedadesInhabilitadas() {
+		enfermedades.forEach{ enfermedad =>
+			if (enfermedad.cantCelulasQueAmenaza() <= 0) {
 				enfermedades.remove(enfermedad)
 			}
 		}
 	}
+
+	method estaMuerto() = enfermedades.contains(muerte)
 
 }
 
@@ -46,9 +48,9 @@ class Enfermedad {
 	method afectarPersona(unaPersona)
 
 	method esAgresivaPara(unaPersona)
-	
-	method atenuar(atenuacion){
-		cantCelulasQueAmenaza -= atenuacion * 15
+
+	method atenuar(atenuacion) {
+		cantCelulasQueAmenaza -= atenuacion
 	}
 
 }
@@ -85,36 +87,71 @@ class EnfermedadAutoinmune inherits Enfermedad {
 		unaPersona.cantidadCelulas(unaPersona.cantidadCelulas() - cantCelulasQueAmenaza)
 	}
 
-	override method esAgresivaPara(unaPersona) {
-		return unaPersona.cuantosDiasVivio() > 30
-	}
+	override method esAgresivaPara(unaPersona) = unaPersona.cuantosDiasVivio() > 30
 
 }
 
 /////////////////////////////////////////temporada 2//////////////////////////////////////
+class EnfermoException inherits Exception {
 
-class EnfermoException inherits Exception {}
+}
 
-class Medico inherits Persona{
-	
-	var dosis = 100	// valor arbitrario
+class Medico inherits Persona {
 
-	method atenderEnfermo(unaPersona){
-		if(unaPersona.estaSano().negate()){
+	var dosis = 100 // valor arbitrario
+
+	method atenderEnfermo(unaPersona) {
+		if (unaPersona.estaSano().negate()) {
 			self.darDosis(unaPersona)
-		}else{
+		} else {
 			throw new EnfermoException (
 				message = "La persona no esta enferma, el doctor no le tiene que curar nada"
 			)
 		}
 	}
-	
-	method darDosis(unaPersona){
+
+	method darDosis(unaPersona) {
 		unaPersona.recibirDosis(dosis)
 	}
-	
+
 	override method contraerEnfermedad(enfermedad) {
-  		super(enfermedad)
-  		self.darDosis(self) 
-  	}
-  }
+		super(enfermedad)
+		self.darDosis(self)
+	}
+
+}
+
+class JefeDeDepartamento inherits Medico {
+
+	const subordinados = #{}
+
+	override method atenderEnfermo(unaPersona) {
+		if (unaPersona.estaSano().negate()) {
+			subordinados.anyOne().darDosis(unaPersona)
+		} else {
+			throw new EnfermoException (
+				message = "La persona no esta enferma, el doctor no le tiene que curar nada"
+			)
+		}
+	}
+
+}
+
+object muerte inherits Enfermedad(cantCelulasQueAmenaza = 0) {
+
+	override method afectarPersona(unaPersona) {
+		self.disminuirTemperatura(unaPersona)
+	}
+
+	method disminuirTemperatura(unaPersona) {
+		unaPersona.temperatura(0)
+	}
+
+	override method esAgresivaPara(unaPersona) = true
+
+	override method atenuar(atenuacion) {
+	// no hace nada
+	}
+
+}
+

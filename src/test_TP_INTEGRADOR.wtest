@@ -16,6 +16,11 @@ describe "Tests de Dr Casa" {
 	)
 	const frank = new Persona(cantidadCelulas = 3500000)
 	
+///////////////////////////////////instancias de medicos/////////////////////////
+
+	const cameron = new Medico(dosis = 100)
+	const house = new JefeDeDepartamento(dosis = 100, subordinados = #{cameron})
+
 	
 /////////////////////// fixture y metodos auxiliares /////////////////////////////
 	
@@ -49,7 +54,7 @@ describe "Tests de Dr Casa" {
 		}
 	}
 
-///////////////////////////////////// TESTS ///////////////////////////////////////
+///////////////////////////////// TESTS DE TEMPORADA 1 ////////////////////////////////////
 
 	test "Saber si la cantidad de células afectadas de Logan que estén afectadas 
 	por enfermedades agresivas es igual a 0" {
@@ -100,6 +105,50 @@ describe "Tests de Dr Casa" {
 		assert.equals(malaria500.cantCelulasQueAmenaza(), 500)
 		malaria500.reproducirse()
 		assert.equals(malaria500.cantCelulasQueAmenaza(), 1000)
+	}
+	
+//////////////////////////////// TESTS DE TEMPORADA 2 /////////////////////////////////////
+	
+	test "Saber si la malaria se atenua correctamente en 100 celulas"{
+		assert.equals(malaria500.cantCelulasQueAmenaza(), 500) // elijo malaria500
+		malaria500.atenuar(100)
+		assert.equals(malaria500.cantCelulasQueAmenaza(), 400)
+	}
+	
+	test "Saber si el lupus se atenua correctamente en 500 celulas"{
+		assert.equals(lupus.cantCelulasQueAmenaza(), 10000) 
+		lupus.atenuar(500)
+		assert.equals(lupus.cantCelulasQueAmenaza(), 9500)
+	}
+	
+	test "Saber si Cameron atiene correctamente a Logan"{
+		assert.equals(logan.enfermedades(), #{ malaria500, otitis, lupus }) 
+		cameron.atenderEnfermo(logan)
+		assert.equals(logan.enfermedades(), #{ lupus })
+	}
+	
+	test "Saber si House atiene correctamente a Logan"{
+		assert.equals(logan.enfermedades(), #{ malaria500, otitis, lupus }) 
+		house.atenderEnfermo(logan)
+		assert.equals(logan.enfermedades(), #{ lupus })
+	}
+	
+	test "Saber si Cameron contrae correctamente la malaria500"{ // elijo malaria500
+		assert.equals(cameron.enfermedades(), #{ }) 
+		cameron.contraerEnfermedad(malaria500)
+		assert.equals(cameron.enfermedades(), #{ }) // porque se cura solo
+	}
+	
+	test "Saber si House contrae correctamente la malaria500"{ // elijo malaria500
+		assert.equals(house.enfermedades(), #{ }) 
+		house.contraerEnfermedad(malaria500)
+		assert.equals(house.enfermedades(), #{ }) // porque se cura solo
+	}
+	
+	test "Saber si House contrae correctamente la muerte"{
+		assert.equals(house.enfermedades(), #{ }) 
+		house.contraerEnfermedad(muerte)
+		assert.equals(house.enfermedades(), #{ muerte })
 	}
 	
 }
