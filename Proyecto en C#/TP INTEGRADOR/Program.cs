@@ -245,14 +245,8 @@ namespace TP_INTEGRADOR
         {
             HashSet<String> nombreEnfermedades = Enfermedades.Select(e => e.Nombre).ToHashSet();
 
-            if (nombreEnfermedades.Contains("Muerte"))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return nombreEnfermedades.Contains("Muerte");
+
         }
 
     }
